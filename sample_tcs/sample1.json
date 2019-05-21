@@ -1,79 +1,96 @@
-[
-	{
-		"match": {
-			"udp": [
-				{
-					"dstport": "5060",
-					"optional": false
-				}
-			],
-			"sip": [
-				{
-					"Request-Line": "INVITE(.*)+436646997348",
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"From": "tel:\\+436646997338"
-					},
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"To": "tel:\\+436646997348"
-					},
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"CSeq": "^1"
-					},
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"P-Access-Network-Info": ".*"
-					},
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"P-Access-Network-Info": ".*"
-					},
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"Call-ID": ".*"
-					},
-					"optional": false
-				}
-			]
+{
+	"import": [],
+	"variables": {
+			"msisdn_a": "\\+436646997338",
+			"msisdn_b": "\\+436646997348"
 		},
-		"store": {
-			"sip": [
-				{
-					"msg_hdr_tree": {
-						"Call-ID": "call_id"
+	"template": [
+		{
+			"match": {
+				"udp": [
+					{
+						"dstport": "5060",
+						"optional": false
 					}
-				}
-			]
-		}
-	},
-	{
-		"match": {
-			"sip": [
-				{
-					"Status-Line": "(.*)100 Trying(.*)",
-					"optional": false
-				},
-				{
-					"msg_hdr_tree": {
-						"Call-ID": "{{call_id}}"
+				],
+				"sip": [
+					{
+						"Request-Line": "INVITE(.*){{msisdn_b}}",
+						"optional": false
 					},
-					"optional": false
-				}
-			]
+					{
+						"msg_hdr_tree": {
+							"From": "tel:{{msisdn_a}}"
+						},
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"To": "tel:{{msisdn_b}}"
+						},
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"CSeq": "^1"
+						},
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"P-Access-Network-Info": ".*"
+						},
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"Call-ID": ".*"
+						},
+						"optional": false
+					}
+				]
+			},
+			"store": {
+				"sip": [
+					{
+						"msg_hdr_tree": {
+							"Call-ID": "call_id"
+						}
+					}
+				]
+			}
+		},
+		{
+			"match": {
+				"sip": [
+					{
+						"Status-Line": "(.*)100 Trying(.*)",
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"Call-ID": "{{call_id}}"
+						},
+						"optional": false
+					}
+				]
+			}
+		},
+		{
+			"match": {
+				"sip": [
+					{
+						"Status-Line": "(.*)180 Ringing(.*)",
+						"optional": false
+					},
+					{
+						"msg_hdr_tree": {
+							"Call-ID": "{{call_id}}"
+						},
+						"optional": false
+					}
+				]
+			}
 		}
-	}
-]
+	]
+}

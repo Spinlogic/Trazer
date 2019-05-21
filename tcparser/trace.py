@@ -24,6 +24,7 @@ class Trace(object):
         return self.current_frame_index
 
 
-    def get_current_frame(self):
-        return self.trace[self.current_frame_index]["_source"]["layers"]
+    def get_frame(self, index):
+        assert(index < len(self.trace))
+        return self.trace[index]["_source"]["layers"]
 
