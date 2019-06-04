@@ -55,7 +55,6 @@ class TestCase(object):
         TC rules must be specified in the other they must be matched.
         When a match is found for a rule, the following rule matched on the
         remaining frames.
-        TODO: Allow some rules to be matched in no "strict" order of frames.
         :return:
         '''
         isframesmatch = False
@@ -81,7 +80,7 @@ class TestCase(object):
         self.__result = isframesmatch
 
 
-    def _is_match_dict(self, protocol, subrule, framedict):
+    def _is_match_dict(self, subrule, framedict):
         '''
         Iterator to math subrule dict trees inside a frame.
         Used to iterate dictionaries inside rules until we get to the actual rule. For example, in rule
@@ -93,7 +92,6 @@ class TestCase(object):
         },
         this iterator will iterate until it find the value of "CSeq".
 
-        :param protocol: protocol prefix (e.g. ip, udp, sip, etc)
         :param subrule: dictionary with one field to match
         :param framedict: dictionary of frame to match against the subrule
         :return: -1 if not found.
@@ -106,7 +104,7 @@ class TestCase(object):
                 continue
             if(matchtype != 1):
                 break
-            frkey = protocol + "." + key   # frame key
+            frkey = key   # frame key
             self.logger.debug("Template Key: {}   Frame Key: {}".format(key, frkey))
             if frkey in framedict.keys():
                 if(type(framedict[frkey]) is not dict):
@@ -120,6 +118,27 @@ class TestCase(object):
                             matchtype = 0
                         else:
                             matchtype = 1
+                    elif(type(framedict[frkey]) is list):
+                        for item in framedict[frkey]:
+                            if(type(item) is str):
+                                searchres = re.search(subrule[key], item)
+                                if (searchres == None):
+                                    matchtype = 0
+                                elif (len(searchres.group()) == 0):
+                                    matchtype = 0
+                                else:
+                                    matchtype = 1
+                                    break
+                            elif(type(item) is dict):
+                                matchtype = self._is_match_dict(subrule[key], item)
+                                if(matchtype == 1):
+                                    break
+                            else:
+                                if (subrule[key] != item):
+                                    matchtype = 0
+                                else:
+                                    matchtype = 1
+                                    break
                     else:
                         if(subrule[key] != framedict[frkey]):
                             matchtype = 0
@@ -127,7 +146,7 @@ class TestCase(object):
                             matchtype = 1
                 else:
                     self.logger.debug("{} is dictionary. Iterating.".format(frkey))
-                    matchtype = self._is_match_dict(protocol, subrule[key], framedict[frkey])
+                    matchtype = self._is_match_dict(subrule[key], framedict[frkey])
             else:
                 matchtype = -1
             self.logger.debug("matchtype: {}".format(matchtype))
@@ -156,7 +175,7 @@ class TestCase(object):
                 isoptional = False
                 if("optional" in subrule):
                     isoptional = subrule["optional"]
-                matchtype = self._is_match_dict(protocol, subrule, frame[protocol])
+                matchtype = self._is_match_dict(subrule, frame[protocol])
                 if(isoptional == True):
                     if(matchtype == -1 or matchtype == 1):
                         msg = "Optional and not present. Match!!!" if(matchtype == -1) else \
@@ -185,7 +204,7 @@ class TestCase(object):
         return ismatch
 
 
-    def _iter_frame_for_store_fields(self, protocol, storedict, framedict):
+    def _iter_frame_for_store_fields(self, storedict, framedict):
         '''
         Iterates the keys in "storedict" inside framedict until it final value. For example, in the following:
         "msg_hdr_tree": {
@@ -193,7 +212,6 @@ class TestCase(object):
             }
         it iterates inside "msg_hdr_tree" until it finds "callId". Since "callId" is not a dict, it stops there.
 
-        :param protocol: suffix for keys in temptdict inside framedict
         :param storedict: dictionary from inside "store" object of a rule. Must contains a single key.
         :param framedict: dictionary from a frame
         :return: Value of the field iterated if it exists. None otherwise.
@@ -203,12 +221,12 @@ class TestCase(object):
         field = None
         value = None
         if (len(keys) > 0):
-            frkey = protocol + "." + keys[0]
+            frkey = keys[0]
             self.logger.debug("Iteration for frkey: {}".format(frkey))
             if (frkey in framedict):  # check that the key exists in the frame
                 if (type(framedict[frkey]) is dict):
                     self.logger.debug("frkey: {} is a dictionary".format(frkey))
-                    field, value = self._iter_frame_for_store_fields(protocol, storedict[keys[0]], framedict[frkey])
+                    field, value = self._iter_frame_for_store_fields(storedict[keys[0]], framedict[frkey])
                 else:
                     field = storedict[keys[0]]
                     value = framedict[frkey]
@@ -247,7 +265,7 @@ class TestCase(object):
         for protocol in store:
             self.logger.debug("Protocol \"{}\"".format(protocol))
             for item in store[protocol]:
-                key, value = self._iter_frame_for_store_fields(protocol, item, frame[protocol])
+                key, value = self._iter_frame_for_store_fields(item, frame[protocol])
                 if (key is not None):
                     # store the value for future use
                     if (value is None):

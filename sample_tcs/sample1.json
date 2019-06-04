@@ -9,52 +9,67 @@
 			"match": {
 				"udp": [
 					{
-						"dstport": "5060",
-						"optional": false
+						"udp.dstport": "5060"
 					}
 				],
 				"sip": [
 					{
-						"Request-Line": "INVITE(.*){{msisdn_b}}",
-						"optional": false
+						"sip.Request-Line": "INVITE(.*){{msisdn_b}}"
 					},
 					{
-						"msg_hdr_tree": {
-							"From": "tel:{{msisdn_a}}"
-						},
-						"optional": false
+						"sip.msg_hdr_tree": {
+							"sip.From": "tel:{{msisdn_a}}"
+						}
 					},
 					{
-						"msg_hdr_tree": {
-							"To": "tel:{{msisdn_b}}"
-						},
-						"optional": false
+						"sip.msg_hdr_tree": {
+							"sip.To": "tel:{{msisdn_b}}"
+						}
 					},
 					{
-						"msg_hdr_tree": {
-							"CSeq": "^1"
-						},
-						"optional": false
+						"sip.msg_hdr_tree": {
+							"sip.CSeq": "^1"
+						}
 					},
 					{
-						"msg_hdr_tree": {
-							"P-Access-Network-Info": ".*"
+						"sip.msg_hdr_tree": {
+							"sip.P-Access-Network-Info": ".*"
 						},
-						"optional": false
+						"optional": true
 					},
 					{
-						"msg_hdr_tree": {
-							"Call-ID": ".*"
-						},
-						"optional": false
+						"sip.msg_hdr_tree": {
+							"sip.Call-ID": ".*"
+						}
+					},
+					{
+						"sip.msg_body": {
+							"sdp": {
+								"sdp.media": "audio(.*)"
+							}
+						}
+					},
+					{
+						"sip.msg_body": {
+							"sdp": {
+								"sdp.media_attr": "rtpmap:(.*)AMR-WB/16000"
+							}
+						}
+					},
+					{
+						"sip.msg_body": {
+							"sdp": {
+								"sdp.media_attr": "fmtp:(.*)mode-set=0,1,2"
+							}
+						}
 					}
 				]
 			},
 			"store": {
 				"sip": [
 					{
-						"msg_hdr_tree": {
-							"Call-ID": "call_id"
+						"sip.msg_hdr_tree": {
+							"sip.Call-ID": "call_id"
 						}
 					}
 				]
@@ -64,14 +79,12 @@
 			"match": {
 				"sip": [
 					{
-						"Status-Line": "(.*)100 Trying(.*)",
-						"optional": false
+						"sip.Status-Line": "(.*)100 Trying(.*)"
 					},
 					{
-						"msg_hdr_tree": {
-							"Call-ID": "{{call_id}}"
-						},
-						"optional": false
+						"sip.msg_hdr_tree": {
+							"sip.Call-ID": "{{call_id}}"
+						}
 					}
 				]
 			}
@@ -80,12 +93,12 @@
 			"match": {
 				"sip": [
 					{
-						"Status-Line": "(.*)180 Ringing(.*)",
+						"sip.Status-Line": "(.*)180 Ringing(.*)",
 						"optional": false
 					},
 					{
-						"msg_hdr_tree": {
-							"Call-ID": "{{call_id}}"
+						"sip.msg_hdr_tree": {
+							"sip.Call-ID": "{{call_id}}"
 						},
 						"optional": false
 					}

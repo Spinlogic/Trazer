@@ -6,7 +6,7 @@ import logging
 from tcparser import trace
 from tcparser import test_case
 
-LOGLEVEL = logging.INFO  # DEBUG, INFO, WARNING, ERROR or CRITICAL
+LOGLEVEL = logging.DEBUG  # DEBUG, INFO, WARNING, ERROR or CRITICAL
 LOGFORMAT = "%(levelname)-9s[%(filename)s:%(lineno)s - %(funcName)s()] %(message)s"
 
 def usage():
