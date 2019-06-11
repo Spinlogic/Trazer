@@ -16,13 +16,14 @@ class Trace(object):
         self.current_frame_index = -1      # current frame number inside a trace
         self.logger = logging.getLogger(__name__)
 
+    def set_frame_index(self, index):
+        self.current_frame_index = index
 
     def get_next_frame_index(self):
         self.current_frame_index += 1
         if(self.current_frame_index >= self.numpackets):
             return -1
         return self.current_frame_index
-
 
     def get_frame(self, index):
         assert(index < len(self.trace))

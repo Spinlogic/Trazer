@@ -1,109 +1,195 @@
 {
-	"import": [],
-	"variables": {
-			"msisdn_a": "\\+436646997338",
-			"msisdn_b": "\\+436646997348"
-		},
-	"template": [
-		{
-			"match": {
-				"udp": [
-					{
-						"udp.dstport": "5060"
-					}
-				],
-				"sip": [
-					{
-						"sip.Request-Line": "INVITE(.*){{msisdn_b}}"
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.From": "tel:{{msisdn_a}}"
-						}
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.To": "tel:{{msisdn_b}}"
-						}
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.CSeq": "^1"
-						}
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.P-Access-Network-Info": ".*"
-						},
-						"optional": true
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.Call-ID": ".*"
-						}
-					},
-					{
-						"sip.msg_body": {
-							"sdp": {
-								"sdp.media": "audio(.*)"
-							}
-						}
-					},
-					{
-						"sip.msg_body": {
-							"sdp": {
-								"sdp.media_attr": "rtpmap:(.*)AMR-WB/16000"
-							}
-						}
-					},
-					{
-						"sip.msg_body": {
-							"sdp": {
-								"sdp.media_attr": "fmtp:(.*)mode-set=0,1,2"
-							}
-						}
-					}
-				]
-			},
-			"store": {
-				"sip": [
-					{
-						"sip.msg_hdr_tree": {
-							"sip.Call-ID": "call_id"
-						}
-					}
-				]
-			}
-		},
-		{
-			"match": {
-				"sip": [
-					{
-						"sip.Status-Line": "(.*)100 Trying(.*)"
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.Call-ID": "{{call_id}}"
-						}
-					}
-				]
-			}
-		},
-		{
-			"match": {
-				"sip": [
-					{
-						"sip.Status-Line": "(.*)180 Ringing(.*)",
-						"optional": false
-					},
-					{
-						"sip.msg_hdr_tree": {
-							"sip.Call-ID": "{{call_id}}"
-						},
-						"optional": false
-					}
-				]
-			}
-		}
-	]
+  "metadata": {
+    "name": "TC08#007",
+    "description": "VoLTE UE in CS Network Places a Call to VoWiFi UE"
+  },
+  "variables": {
+    "msisdn_a": "\\+436646997338",
+    "msisdn_b": "\\+436646997348"
+  },
+  "template": [
+    {
+      "optional": false,
+      "metadata": {
+        "name": "UNI INVITE",
+        "description" : "This INVITE does not show in all traces since IPSec is used in UNI"
+      },
+      "report": [
+        {
+          "tag": "From",
+          "value": "{{msisdn_a}}"
+        },
+        {
+          "tag": "To",
+          "value": "{{msisdn_b}}"
+        },
+        {
+          "tag": "UNI Call-ID",
+          "value": "{{call_id}}"
+        },
+        {
+          "tag": "Offered codecs",
+          "value": "{{uni_offered_codecs}}"
+        }
+      ],
+      "match": {
+        "sip": [
+          {
+            "sip.Request-Line": "INVITE(.*){{msisdn_b}}"
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.From": "tel:{{msisdn_a}}"
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.To": "tel:{{msisdn_b}}"
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.CSeq": "^1"
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.P-Access-Network-Info": "GEN-ACCESS(.*)"
+            },
+            "optional": true
+          },
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media": "audio(.*)"
+              }
+            }
+          },
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media_attr": "rtpmap:(.*)AMR-WB/16000"
+              }
+            }
+          },
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media_attr": "fmtp:(.*)mode-set=0,1,2"
+              }
+            }
+          }
+        ]
+      },
+      "store": {
+        "sip": [
+          {
+            "sip.msg_hdr_tree": {
+              "sip.Call-ID": "call_id"
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.CSeq": "invite_cseq"
+            }
+          },
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media_attr": "uni_offered_codecs"
+              }
+            }
+          }
+        ]
+      },
+      "verify": [
+        {
+          "field": "uni_offered_codecs",
+          "contains": "AMR"
+        }
+      ]
+    },
+    {
+      "optional": true,
+      "metadata": {
+        "name": "183 response",
+        "description" : "Screen selected codec"
+      },
+      "match": {
+        "sip": [
+          {
+            "sip.Status-Line": "(.*)183(.*)"
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.Call-ID": "{{call_id}}"
+            }
+          }
+        ]
+      },
+      "store": {
+        "sip": [
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media_attr": "selected_codec"
+              }
+            }
+          }
+        ]
+      },
+      "verify": [
+        {
+          "field": "selected_codec",
+          "contains": "AMR"
+        }
+      ]
+    },
+    {
+      "metadata": {
+        "name": "200 response",
+        "description" : "Session established"
+      },
+      "report": [
+        {
+          "tag": "Selected_Codec",
+          "value": "{{selected_codec}}"
+        }
+      ],
+      "match": {
+        "sip": [
+          {
+            "sip.Status-Line": "(.*)200 OK"
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.Call-ID": "{{call_id}}"
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.CSeq": "{{invite_cseq}}"
+            }
+          }
+        ]
+      },
+      "store": {
+        "sip": [
+          {
+            "sip.msg_body": {
+              "sdp": {
+                "sdp.media_attr": "selected_codec"
+              }
+            }
+          }
+        ]
+      },
+      "verify": [
+        {
+          "field": "selected_codec",
+          "contains": "AMR"
+        }
+      ]
+    }
+  ]
 }
