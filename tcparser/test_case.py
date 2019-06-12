@@ -104,6 +104,7 @@ class TestCase(object):
                 isframesmatch = self.__apply_rule(rule, frame)
                 self.__current_frame_index = self.__trace.get_next_frame_index()  # increment here
                 if isframesmatch:
+                    self.__report.add_to_current_rule("frame_number", self.__current_frame_index - 1)
                     isruleoptional = False  # Once a rule is matched, it stops being optional
                     self.logger.debug("isframesmatch: {}. Rule matched!!!".format(isframesmatch))
                     break   # rule has been matched
