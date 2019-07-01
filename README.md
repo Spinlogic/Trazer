@@ -228,7 +228,26 @@ For example:
  
  # *verify* field
  
- List of variable / value pairs to verify to pass the TC.
+ List of variable / value pairs to verify to pass the TC. For example:
+ 
+  ```json
+ "verify": [
+        {
+          "field": "selected_codec",
+          "contains": "AMR"
+        }
+      ]
+  ```
+  
+ The "field" key is the name of a variable defined either in this rule or a 
+ previous rule inside the TC.
+ 
+ The condition can be:
+ 
+ | Key | Content 
+| ----- | --------
+| contains | Search as regexp. Can be either a string or a pythonic regular expression.
+| is | match exact value. The value can be of any type (string, integer, boolean, etc.).
  
  The presence of this field is optional. It shall only be present when there is
  a need to verify specific conditions inside a matched frame.
@@ -248,10 +267,12 @@ evaluated when the frame is matched and the outcome is reflected in the report
 for the rule. An unmet condition in "match" will result in the rule not being
 matched to any frame, and no report is generated for this rule.* 
 
+The two veri
+
 # TC Report
 
-The Test Case report is built from the metadata of the TC and its rules, and 
-from the *report* fields inside the TC's rules.
+The Test Case report is built from the metadata information and from the *report* fields 
+inside the TC's rules.
 
 The TC report has JSON format and looks like:
 

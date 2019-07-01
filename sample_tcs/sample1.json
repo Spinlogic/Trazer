@@ -12,7 +12,7 @@
       "optional": false,
       "metadata": {
         "name": "UNI INVITE",
-        "description" : "This INVITE does not show in all traces since IPSec is used in UNI"
+        "description" : "This INVITE is present only in traces that include UNI IMS signalling."
       },
       "report": [
         {
@@ -26,6 +26,10 @@
         {
           "tag": "UNI Call-ID",
           "value": "{{call_id}}"
+        },
+        {
+          "tag": "P-Access-Network-Info",
+          "value": "{{opani}}"
         },
         {
           "tag": "Offered codecs",
@@ -55,8 +59,7 @@
           {
             "sip.msg_hdr_tree": {
               "sip.P-Access-Network-Info": "GEN-ACCESS(.*)"
-            },
-            "optional": true
+            }
           },
           {
             "sip.msg_body": {
@@ -94,6 +97,12 @@
             }
           },
           {
+            "sip.msg_hdr_tree": {
+              "sip.P-Access-Network-Info": "opani"
+            },
+            "optional": true
+          },
+          {
             "sip.msg_body": {
               "sdp": {
                 "sdp.media_attr": "uni_offered_codecs"
@@ -115,6 +124,16 @@
         "name": "183 response",
         "description" : "Screen selected codec"
       },
+      "report": [
+        {
+          "tag": "Selected_Codec",
+          "value": "{{selected_codec}}"
+        },
+        {
+          "tag": "P-Access-Network-Info",
+          "value": "{{tpani}}"
+        }
+      ],
       "match": {
         "sip": [
           {
@@ -135,6 +154,11 @@
                 "sdp.media_attr": "selected_codec"
               }
             }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.P-Access-Network-Info": "tpani"
+            }
           }
         ]
       },
@@ -154,6 +178,10 @@
         {
           "tag": "Selected_Codec",
           "value": "{{selected_codec}}"
+        },
+        {
+          "tag": "P-Access-Network-Info",
+          "value": "{{tpani}}"
         }
       ],
       "match": {
@@ -180,6 +208,11 @@
               "sdp": {
                 "sdp.media_attr": "selected_codec"
               }
+            }
+          },
+          {
+            "sip.msg_hdr_tree": {
+              "sip.P-Access-Network-Info": "tpani"
             }
           }
         ]

@@ -1,0 +1,8 @@
+# Sample file for importing variables
+# Each line contains a tag value.
+# Tags must be alphanumerical. The can contains also chars like - or _, but they must not contain spaces or tabs.
+# Value can contain anything, except for new lines.
+# Anything after a # is considered a comment.
+# Empty lines are ignored
+
+msisdn_b    +436646997348
