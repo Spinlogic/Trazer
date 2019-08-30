@@ -1,4 +1,5 @@
 {
+  "import": {},
   "metadata": {
     "name": "TC08#007",
     "description": "VoLTE UE in CS Network Places a Call to VoWiFi UE"
